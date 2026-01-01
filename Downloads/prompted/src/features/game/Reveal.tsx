@@ -41,17 +41,24 @@ export const RevealStage = () => {
                 </motion.div>
 
                 {/* Original Sketches (Mini) */}
-                <div className="mt-8 flex gap-4 overflow-x-auto p-4 w-full max-w-4xl bg-white/50 backdrop-blur-md rounded-2xl border border-white/40">
-                    {gameState.players.map(p => (
-                        p.drawing && (
-                            <div key={p.id} className="w-24 h-24 bg-white rounded-lg shadow-sm shrink-0 border border-gray-100 overflow-hidden relative">
-                                <img src={p.drawing} className="w-full h-full object-contain opacity-50 hover:opacity-100 transition-opacity" />
-                                <div className="absolute bottom-0 inset-x-0 bg-black/5 p-1 text-[8px] font-bold text-center truncate">
-                                    {p.name}
+                <div className="mt-8 w-full max-w-4xl space-y-2">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-2">The Culprits</p>
+                    <div className="flex gap-4 overflow-x-auto p-4 w-full bg-white/50 backdrop-blur-md rounded-2xl border border-white/40 shadow-inner">
+                        {gameState.players.map(p => (
+                            p.drawing && (
+                                <div key={p.id} className="w-32 h-32 bg-white rounded-xl shadow-md shrink-0 border-2 border-transparent hover:border-black transition-all overflow-hidden relative group/card cursor-pointer">
+                                    <img src={p.drawing} className="w-full h-full object-contain p-2" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors" />
+                                    <div className="absolute bottom-0 inset-x-0 bg-black/80 p-1 py-1.5 text-[10px] font-bold text-center text-white truncate">
+                                        {p.name}
+                                    </div>
+                                    <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 bg-white rounded-full p-1 shadow-sm">
+                                        <div className={`w-2 h-2 rounded-full ${p.avatarColor}`} />
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    ))}
+                            )
+                        ))}
+                    </div>
                 </div>
             </div>
 

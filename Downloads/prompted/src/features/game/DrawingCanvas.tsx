@@ -43,8 +43,8 @@ export const DrawingCanvas = () => {
     }
 
     return (
-        <div className="flex flex-col h-screen p-4 pb-8">
-            <div className="text-center mb-4 space-y-1">
+        <div className="flex flex-col h-[100dvh] p-4 pb-8 touch-none overflow-hidden">
+            <div className="text-center mb-2 space-y-1">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">CURRENT OBJECTIVE</h3>
                 {/* We need the local player's prompt here. Passed in context or from gameState if secure? */}
                 {/* For simplicity assuming we can read our own slot from gameState or if not passed, generic. */}

@@ -25,11 +25,74 @@ export const DrawingPad: React.FC<DrawingPadProps> = ({
     const [historyStep, setHistoryStep] = useState(-1);
 
     // Initial Setup
-    // ... (keep usage of useEffect for resize) ...
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const container = containerRef.current;
+        if (canvas && container) {
+            const updateSize = () => {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                // setting size clears canvas, so we need to restore or just clear?
+                // For simplicity in this game, we clear on resize or better prevent resize?
+                // We'll leave it as is, usually mobile doesn't resize dynamically much during drawing
+                // aside from orientation change.
 
-    // ... (keep saveState and undo) ...
+                // Initialize white background
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    saveState();
+                }
+            };
 
-    // Flood Fill Algorithm
+            updateSize();
+            const resizeObserver = new ResizeObserver(updateSize);
+            resizeObserver.observe(container);
+
+            // Load initial data if provided
+            if (initialData) {
+                const img = new Image();
+                img.src = initialData;
+                img.onload = () => {
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0);
+                    saveState();
+                };
+            }
+
+            return () => resizeObserver.disconnect();
+        }
+    }, [initialData]);
+
+    const saveState = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (canvas && ctx) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const newHistory = history.slice(0, historyStep + 1);
+            newHistory.push(imageData);
+
+            // Limit history
+            if (newHistory.length > 20) newHistory.shift();
+
+            setHistory(newHistory);
+            setHistoryStep(newHistory.length - 1);
+        }
+    };
+
+    const undo = () => {
+        if (historyStep > 0) {
+            const newStep = historyStep - 1;
+            const imageData = history[newStep];
+            const canvas = canvasRef.current;
+            const ctx = canvas?.getContext('2d');
+            if (canvas && ctx && imageData) {
+                ctx.putImageData(imageData, 0, 0);
+                setHistoryStep(newStep);
+            }
+        }
+    };
     const floodFill = (ctx: CanvasRenderingContext2D, x: number, y: number, fillColor: string) => {
         const width = ctx.canvas.width;
         const height = ctx.canvas.height;
@@ -207,8 +270,10 @@ export const DrawingPad: React.FC<DrawingPadProps> = ({
                 </div>
             )}
 
+
+
             {/* Canvas Container */}
-            <div ref={containerRef} className="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-black/5 touch-none relative cursor-crosshair">
+            <div ref={containerRef} className="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-black/5 touch-none relative cursor-crosshair mx-2">
                 <canvas
                     ref={canvasRef}
                     onMouseDown={startDrawing}
@@ -223,22 +288,24 @@ export const DrawingPad: React.FC<DrawingPadProps> = ({
             </div>
 
             {/* Submit Bar */}
-            {!readOnly && (
-                <div className="mt-6 flex justify-between items-center px-2">
-                    <div className="font-display font-black text-gray-400 text-sm tracking-widest">
-                        TIMER: <span className="text-black text-xl ml-2">{timeLeft}s</span>
-                    </div>
+            {
+                !readOnly && (
+                    <div className="mt-6 flex justify-between items-center px-2">
+                        <div className="font-display font-black text-gray-400 text-sm tracking-widest">
+                            TIMER: <span className="text-black text-xl ml-2">{timeLeft}s</span>
+                        </div>
 
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSubmit}
-                        className="bg-black text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-black/20 flex items-center gap-2"
-                    >
-                        Transmit Data <CheckCircle className="w-5 h-5" />
-                    </motion.button>
-                </div>
-            )}
-        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSubmit}
+                            className="bg-black text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-black/20 flex items-center gap-2"
+                        >
+                            Transmit Data <CheckCircle className="w-5 h-5" />
+                        </motion.button>
+                    </div>
+                )
+            }
+        </div >
     );
 };

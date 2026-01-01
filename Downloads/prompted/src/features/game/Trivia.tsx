@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { motion } from 'framer-motion';
 import { useGameHost } from '../../hooks/useGameHost';
@@ -15,14 +15,42 @@ export const TriviaRound = () => {
     // Simplification: Client side logic for answering
     const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
     const [isRevealed, setIsRevealed] = useState(false);
+    const [loadingFact, setLoadingFact] = useState("Initializing creative subroutines...");
+
+    useEffect(() => {
+        if (gameState.trivia) return;
+
+        const facts = [
+            "Analyzing pixel density...",
+            "Consulting artistic databases...",
+            "Judging your color choices...",
+            "Compiling chaos theory...",
+            "Reticulating splines...",
+            "Asking the AI if this is art...",
+            "Generating witty commentary...",
+            "Applying sheer genius..."
+        ];
+
+        let i = 0;
+        const interval = setInterval(() => {
+            setLoadingFact(facts[Math.floor(Math.random() * facts.length)]);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [gameState.trivia]);
 
     // If no trivia generated yet (AI lag), show loading state
     if (!gameState.trivia) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-pulse">
-                <h2 className="text-2xl font-display font-black tracking-tighter mb-4">ANALYZING ARTIFACTS...</h2>
-                <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="mt-8 text-gray-500 font-bold uppercase tracking-widest text-xs">AI IS GENERATING TRIVIA</p>
+                <h2 className="text-2xl font-display font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                    CREATING MASTERPIECE...
+                </h2>
+                <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-8" />
+
+                <p className="max-w-xs text-gray-500 font-bold uppercase tracking-widest text-xs mx-auto animate-fade-in transition-all">
+                    {loadingFact}
+                </p>
             </div>
         );
     }
