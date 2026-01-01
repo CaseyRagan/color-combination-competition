@@ -20,24 +20,25 @@ export default async function handler(
 
         const [fields, files] = await form.parse(req);
 
-        // Check if image file exists in the request
-        const imageFile = files.image?.[0];
+        // Check if file exists in the request - n8n sends 'video', but we'll be robust
+        const file = files.video?.[0] || files.image?.[0] || Object.values(files).flat()[0];
 
-        if (!imageFile) {
+        if (!file) {
             return res.status(400).json({
                 success: false,
-                error: 'No image provided'
+                error: 'No file provided'
             });
         }
 
-        // Process the image here (upload to storage, DB, etc.)
+        // Process the file here (upload to storage, DB, etc.)
         // For now, just return success metadata
 
         return res.status(200).json({
             success: true,
-            message: 'Composite image received',
-            filename: imageFile.originalFilename,
-            size: imageFile.size
+            message: 'File received',
+            filename: file.originalFilename,
+            size: file.size,
+            type: file.mimetype
         });
 
     } catch (error) {
