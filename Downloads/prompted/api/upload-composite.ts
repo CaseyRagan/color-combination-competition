@@ -30,15 +30,23 @@ export default async function handler(
             });
         }
 
-        // Process the file here (upload to storage, DB, etc.)
-        // For now, just return success metadata
+        // Process the file here 
+        // We need to return the file data so n8n can pass it back to the client
+        const fs = await import('fs');
+        const fileData = await fs.promises.readFile(file.filepath);
+        const base64Data = fileData.toString('base64');
+        const dataUrl = `data:${file.mimetype || 'image/png'};base64,${base64Data}`;
 
         return res.status(200).json({
             success: true,
             message: 'File received',
             filename: file.originalFilename,
             size: file.size,
-            type: file.mimetype
+            type: file.mimetype,
+            // Critical: Return the data so n8n "Respond to Game" node can pick it up
+            imageData: dataUrl,
+            // Also imply it might be video
+            videoUrl: file.mimetype?.startsWith('video') ? dataUrl : undefined
         });
 
     } catch (error) {
